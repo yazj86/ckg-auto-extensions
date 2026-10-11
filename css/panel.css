@@ -1,0 +1,1088 @@
+/* ============================================================
+   CKG Auto - Panel Stylesheet (with Dark Mode)
+   ============================================================ */
+
+/* ---------- Design Tokens (Light) ---------- */
+:root {
+  /* Brand */
+  --brand: #0f7f8c;
+  --brand-dark: #0a5a63;
+  --brand-soft: #e8f5f7;
+  --brand-ring: rgba(15, 127, 140, 0.18);
+
+  /* Text */
+  --ink: #1e293b;
+  --ink-soft: #475569;
+  --muted: #64748b;
+
+  /* Surfaces */
+  --bg: #eef2f7;
+  --surface: #ffffff;
+  --surface-2: #fbfdfe;
+  --surface-3: #f6fafb;
+  --surface-4: #f8fafc;
+  --line: #e2e8f0;
+
+  /* Semantic */
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-soft: #fee4e2;
+  --danger-border: #fecdca;
+  --danger-text: #b42318;
+  --danger-ink: #ffffff;
+
+  --success: #0f8a5f;
+  --success-hover: #0b7150;
+  --success-ink: #ffffff;
+
+  --info-bg: #f0f9ff;
+  --info-border: #bae6fd;
+  --info-text: #075985;
+  --info-accent: #0ea5e9;
+
+  --warn-bg: #fffbeb;
+  --warn-border: #fde68a;
+  --warn-text: #78350f;
+  --warn-accent: #f59e0b;
+
+  /* Table */
+  --table-head-bg: #10323c;
+  --table-head-ink: #e6f4f6;
+  --table-row-odd: #fbfdfe;
+  --table-row-hover: #eff9fa;
+  --table-row-danger: #fee4e2;
+  --table-row-primary: #e0f2fe;
+
+  /* Header */
+  --header-grad: linear-gradient(135deg, #128e9c 0%, #0f7f8c 40%, #0a5a63 100%);
+  --header-icon-bg: rgba(255, 255, 255, 0.16);
+  --header-icon-border: rgba(255, 255, 255, 0.28);
+
+  /* Background radial glow */
+  --radial-1: radial-gradient(
+    900px 500px at 0% -10%,
+    #d7ecf0 0%,
+    transparent 60%
+  );
+  --radial-2: radial-gradient(
+    700px 420px at 110% 0%,
+    #e3e8f8 0%,
+    transparent 55%
+  );
+
+  /* Elevation */
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 1px 2px rgba(15, 35, 60, 0.06);
+  --shadow-md: 0 10px 30px rgba(15, 35, 60, 0.1);
+  --shadow-lg: 0 18px 45px rgba(15, 35, 60, 0.14);
+}
+
+/* ---------- Design Tokens (Dark) ---------- */
+html[data-theme="dark"] {
+  --brand: #14b8a6;
+  --brand-dark: #2dd4bf;
+  --brand-soft: rgba(20, 184, 166, 0.15);
+  --brand-ring: rgba(20, 184, 166, 0.3);
+
+  --ink: #f1f5f9;
+  --ink-soft: #cbd5e1;
+  --muted: #94a3b8;
+
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-2: #1a2332;
+  --surface-3: #172032;
+  --surface-4: #172032;
+  --line: #334155;
+
+  --danger: #f87171;
+  --danger-hover: #fca5a5;
+  --danger-soft: rgba(220, 38, 38, 0.2);
+  --danger-border: rgba(220, 38, 38, 0.45);
+  --danger-text: #fca5a5;
+  --danger-ink: #450a0a;
+
+  --success: #34d399;
+  --success-hover: #10b981;
+  --success-ink: #052e1f;
+
+  --info-bg: rgba(14, 165, 233, 0.12);
+  --info-border: rgba(14, 165, 233, 0.35);
+  --info-text: #7dd3fc;
+  --info-accent: #38bdf8;
+
+  --warn-bg: rgba(245, 158, 11, 0.12);
+  --warn-border: rgba(245, 158, 11, 0.35);
+  --warn-text: #fcd34d;
+  --warn-accent: #fbbf24;
+
+  --table-head-bg: #0a1a22;
+  --table-head-ink: #a7f3d0;
+  --table-row-odd: #1a2332;
+  --table-row-hover: rgba(20, 184, 166, 0.1);
+  --table-row-danger: rgba(220, 38, 38, 0.18);
+  --table-row-primary: rgba(14, 165, 233, 0.18);
+
+  --header-grad: linear-gradient(135deg, #0d5a63 0%, #0a4d55 40%, #063942 100%);
+  --header-icon-bg: rgba(20, 184, 166, 0.2);
+  --header-icon-border: rgba(20, 184, 166, 0.4);
+
+  --radial-1: radial-gradient(
+    900px 500px at 0% -10%,
+    rgba(20, 184, 166, 0.1) 0%,
+    transparent 60%
+  );
+  --radial-2: radial-gradient(
+    700px 420px at 110% 0%,
+    rgba(99, 102, 241, 0.1) 0%,
+    transparent 55%
+  );
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Base ---------- */
+body {
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image: var(--radial-1), var(--radial-2);
+  background-attachment: fixed;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+/* ---------- Shell / Card ---------- */
+.app-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  color: #fff;
+  background: var(--header-grad);
+  overflow: hidden;
+  transition: background 0.25s ease;
+}
+.app-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    420px 200px at 88% -40%,
+    rgba(255, 255, 255, 0.28),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+.app-header-icon {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--header-icon-bg);
+  border: 1px solid var(--header-icon-border);
+  backdrop-filter: blur(4px);
+  padding: 6px;
+}
+.app-header-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.app-header-text {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.app-header-text h1 {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1.25;
+}
+.app-header-text p {
+  margin: 3px 0 0;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.82);
+  letter-spacing: 0.2px;
+}
+
+/* ---------- Theme Toggle Button ---------- */
+.theme-toggle {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--header-icon-border);
+  background: var(--header-icon-bg);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease;
+}
+.theme-toggle:hover {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.28);
+}
+.theme-toggle:active {
+  transform: scale(0.96);
+}
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+}
+.theme-toggle .icon-moon {
+  display: none;
+}
+.theme-toggle .icon-sun {
+  display: block;
+}
+html[data-theme="dark"] .theme-toggle .icon-sun {
+  display: none;
+}
+html[data-theme="dark"] .theme-toggle .icon-moon {
+  display: block;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.86rem;
+  transition: all 0.16s ease;
+}
+.btn-primary {
+  background-color: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(15, 127, 140, 0.24);
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--brand-dark) !important;
+  border-color: var(--brand-dark) !important;
+  color: #0f172a;
+}
+.btn-outline-primary {
+  color: var(--brand);
+  border-color: var(--line);
+  background: var(--surface);
+}
+.btn-outline-primary:hover {
+  background-color: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand-dark);
+}
+.btn-success {
+  background-color: var(--success);
+  border-color: var(--success);
+  color: var(--success-ink);
+  box-shadow: 0 4px 14px rgba(15, 138, 95, 0.26);
+}
+.btn-success:hover,
+.btn-success:focus {
+  background-color: var(--success-hover) !important;
+  border-color: var(--success-hover) !important;
+  color: var(--success-ink);
+}
+.btn-action {
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+}
+
+/* ---------- Field card (tanggal) ---------- */
+.field-card {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    180deg,
+    var(--surface-2) 0%,
+    var(--surface-3) 100%
+  );
+}
+.field-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.field-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.field-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 999px;
+  color: var(--danger-text);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+}
+
+/* ---------- Form controls ---------- */
+.form-select,
+.form-control {
+  border-radius: var(--radius-sm);
+  border-color: var(--line);
+  font-size: 0.86rem;
+  padding: 0.45rem 0.7rem;
+  color: var(--ink);
+  background-color: var(--surface);
+  transition:
+    border-color 0.16s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+.form-select:focus,
+.form-control:focus {
+  border-color: var(--brand);
+  background-color: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 0 0 0.2rem var(--brand-ring);
+}
+.form-select option {
+  background-color: var(--surface);
+  color: var(--ink);
+}
+
+/* ---------- Divider ---------- */
+.section-divider {
+  margin: 14px 0 10px;
+  border: 0;
+  border-top: 1px dashed var(--line);
+}
+
+/* ---------- Table ---------- */
+.table-responsive {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.table-responsive::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+.table-responsive::-webkit-scrollbar-track {
+  background: var(--surface-3);
+}
+.table-responsive::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 8px;
+  border: 2px solid var(--surface-3);
+}
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+.table {
+  margin-bottom: 0;
+  color: var(--ink);
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: var(--table-head-bg) !important;
+  color: var(--table-head-ink) !important;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.65rem;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  white-space: nowrap;
+}
+.table tbody td {
+  font-size: 0.78rem;
+  padding: 0.5rem 0.65rem;
+  vertical-align: middle;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.table tbody tr:nth-child(odd) {
+  background-color: var(--table-row-odd);
+}
+.table tbody tr:hover {
+  background-color: var(--table-row-hover);
+}
+.table tbody tr.table-primary {
+  background-color: var(--table-row-primary) !important;
+}
+
+/* ---------- Settings card ---------- */
+.settings-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    180deg,
+    var(--surface-2) 0%,
+    var(--surface-3) 100%
+  );
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.settings-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+.settings-head .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+.settings-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.settings-body {
+  padding: 12px 14px 14px;
+}
+
+/* ---------- Sub title ---------- */
+.sub-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--brand-dark);
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--line);
+  margin-bottom: 10px;
+}
+
+/* ---------- Switch grid ---------- */
+.switch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  gap: 8px;
+}
+.switch-grid .form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.16s ease;
+  cursor: pointer;
+}
+.switch-grid .form-check:hover {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+.switch-grid .form-check-input {
+  flex: 0 0 auto;
+  float: none;
+  margin: 0;
+  cursor: pointer;
+  background-color: var(--surface-3);
+  border-color: var(--line);
+}
+.switch-grid .form-check-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  margin: 0;
+}
+.form-check-input:checked {
+  background-color: var(--brand);
+  border-color: var(--brand);
+}
+.form-check-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 0.2rem var(--brand-ring);
+}
+.switch-grid .form-check:has(.form-check-input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+.switch-grid .form-check:has(.form-check-input:checked) .form-check-label {
+  color: var(--brand-dark);
+}
+
+/* ---------- Sub group (detail pemeriksaan) ---------- */
+#subPemeriksaanGroup {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed var(--line) !important;
+  border-radius: var(--radius-md);
+  background: var(--surface-3) !important;
+  box-shadow: none !important;
+}
+#subPemeriksaanGroup .sub-title {
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---------- Accordion (Ringkasan) ---------- */
+#accordionSummary {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface);
+}
+#accordionSummary .accordion-item {
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+}
+#accordionSummary .accordion-button {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: none;
+  gap: 8px;
+}
+#accordionSummary .accordion-button:not(.collapsed) {
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+}
+#accordionSummary .accordion-button:focus {
+  box-shadow: none;
+  border-color: transparent;
+}
+#accordionSummary .accordion-button::after {
+  background-size: 0.9rem;
+}
+#accordionSummary .accordion-body {
+  background: var(--surface-2);
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+}
+html[data-theme="dark"] #accordionSummary .accordion-button::after {
+  filter: invert(1) brightness(1.5);
+}
+
+/* ---------- Alert / message ---------- */
+#parent-text-message {
+  border: 1px solid var(--warn-border);
+  border-left: 4px solid var(--warn-accent);
+  border-radius: var(--radius-md);
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  font-size: 0.82rem;
+  padding: 0.7rem 0.9rem;
+}
+#parent-text-message svg {
+  fill: var(--warn-accent);
+}
+
+/* ---------- Loading ---------- */
+#loading-spinner {
+  padding: 18px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+#loading-spinner p {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--warn-text);
+  margin-bottom: 12px;
+}
+#loading-spinner .spinner-grow {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin: 0 2px;
+}
+
+/* ---------- Utilities ---------- */
+@keyframes ckgBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.blink-animation {
+  animation: ckgBlink 1.1s ease-in-out infinite;
+}
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* ============================================================
+   FIX: Table Dark Mode — Samakan dengan data-preparation.css
+   Target: Bootstrap 5.0.2 striped/bordered table + row highlight
+   ============================================================ */
+
+/* --- 1. Kill CSS variable internal Bootstrap pada tabel --- */
+.table,
+.table > thead,
+.table > tbody,
+.table > tfoot,
+.table > tr,
+.table > thead > tr,
+.table > tbody > tr {
+  --bs-table-bg: transparent !important;
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-color: var(--ink) !important;
+  --bs-table-striped-color: var(--ink) !important;
+  --bs-table-striped-bg: transparent !important;
+  --bs-table-active-color: var(--ink) !important;
+  --bs-table-active-bg: transparent !important;
+  --bs-table-hover-color: var(--ink) !important;
+  --bs-table-hover-bg: transparent !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+/* --- 2. Kill trik box-shadow inset di setiap cell --- */
+.table > :not(caption) > * > * {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+/* --- 3. Background baris dasar --- */
+.table > tbody > tr {
+  background-color: var(--surface) !important;
+  color: var(--ink) !important;
+}
+
+/* --- 4. Striped: baris ganjil --- */
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: var(--table-row-odd) !important;
+  color: var(--ink) !important;
+}
+.table-striped > tbody > tr:nth-of-type(odd) > td,
+.table-striped > tbody > tr:nth-of-type(odd) > th {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+}
+
+/* --- 5. Striped: baris genap --- */
+.table-striped > tbody > tr:nth-of-type(even) {
+  background-color: var(--surface) !important;
+  color: var(--ink) !important;
+}
+.table-striped > tbody > tr:nth-of-type(even) > td,
+.table-striped > tbody > tr:nth-of-type(even) > th {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+}
+
+/* --- 6. Hover --- */
+.table > tbody > tr:hover {
+  background-color: var(--table-row-hover) !important;
+}
+.table > tbody > tr:hover > td,
+.table > tbody > tr:hover > th {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+}
+
+/* --- 7. Row highlight saat robot sedang memproses (.table-primary) --- */
+.table > tbody > tr.table-primary,
+.table-striped > tbody > tr.table-primary,
+.table-striped > tbody > tr:nth-of-type(odd).table-primary,
+.table-striped > tbody > tr:nth-of-type(even).table-primary {
+  background-color: var(
+    --table-row-primary,
+    rgba(14, 165, 233, 0.18)
+  ) !important;
+}
+.table > tbody > tr.table-primary > td,
+.table > tbody > tr.table-primary > th {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+}
+
+/* --- 8. Header tabel (thead.table-dark) --- */
+.table > thead > tr > th,
+.table-dark > thead > tr > th,
+.table > thead.table-dark > tr > th {
+  background-color: var(--table-head-bg) !important;
+  color: var(--table-head-ink) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* --- 9. Border tabel --- */
+.table,
+.table-bordered,
+.table-bordered > :not(caption) > * {
+  border-color: var(--line) !important;
+}
+
+/* --- 10. Wrapper .table-responsive --- */
+.table-responsive {
+  background-color: var(--surface) !important;
+  border-color: var(--line) !important;
+}
+
+/* --- 11. Dark mode: paksa semua sel jadi terang --- */
+html[data-theme="dark"] .table,
+html[data-theme="dark"] .table > thead,
+html[data-theme="dark"] .table > tbody,
+html[data-theme="dark"] .table > tfoot,
+html[data-theme="dark"] .table > tbody > tr,
+html[data-theme="dark"] .table > tbody > tr > td,
+html[data-theme="dark"] .table > tbody > tr > th,
+html[data-theme="dark"] .table > thead > tr > th,
+html[data-theme="dark"] .table > tfoot > tr > td {
+  color: #f1f5f9 !important;
+}
+
+/* --- 12. Dark mode: header tetap warna khusus --- */
+html[data-theme="dark"] .table > thead > tr > th {
+  color: var(--table-head-ink) !important;
+}
+
+/* --- 13. Dark mode: badge (Valid ✓ / ⚠️ Invalid) --- */
+html[data-theme="dark"] .table .badge.bg-success {
+  color: #052e1f !important;
+}
+html[data-theme="dark"] .table .badge.bg-danger {
+  color: #fff !important;
+}
+
+/* --- 14. Dark mode: warna semantic di dalam tabel --- */
+html[data-theme="dark"] .table td.text-danger,
+html[data-theme="dark"] .table td .text-danger {
+  color: #f87171 !important;
+}
+html[data-theme="dark"] .table td.text-primary,
+html[data-theme="dark"] .table td .text-primary {
+  color: #2dd4bf !important;
+}
+html[data-theme="dark"] .table td.text-success,
+html[data-theme="dark"] .table td .text-success {
+  color: #34d399 !important;
+}
+html[data-theme="dark"] .table td.text-muted,
+html[data-theme="dark"] .table td .text-muted {
+  color: #94a3b8 !important;
+}
+
+/* --- 15. Dropdown "Aksi" di dalam tabel --- */
+.table .dropdown-toggle.btn-warning {
+  color: #0f172a !important;
+}
+.table .dropdown-menu {
+  background-color: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+.table .dropdown-menu .dropdown-item {
+  color: var(--ink);
+}
+.table .dropdown-menu .dropdown-item:hover,
+.table .dropdown-menu .dropdown-item:focus {
+  background-color: var(--brand-soft);
+  color: var(--brand-dark);
+}
+.table .dropdown-menu .dropdown-header {
+  color: var(--muted);
+}
+.table .dropdown-menu .dropdown-divider {
+  border-color: var(--line);
+}
+
+/* --- 16. Dark mode: dropdown menu --- */
+html[data-theme="dark"] .table .dropdown-menu {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+html[data-theme="dark"] .table .dropdown-menu .dropdown-item {
+  color: #f1f5f9 !important;
+}
+html[data-theme="dark"] .table .dropdown-menu .dropdown-item:hover,
+html[data-theme="dark"] .table .dropdown-menu .dropdown-item:focus {
+  background-color: rgba(20, 184, 166, 0.15) !important;
+  color: #2dd4bf !important;
+}
+html[data-theme="dark"] .table .dropdown-menu .dropdown-divider {
+  border-color: #334155 !important;
+}
+/* ============================================================
+   MIGRASI dari style.css lama
+   ============================================================ */
+
+/* --- Base panel body --- */
+body {
+  width: 100%;
+  font-size: 14px;
+  overflow-y: auto;
+}
+
+/* --- Compact table (dipakai #tBodyAktifData) --- */
+.table-compact {
+  font-size: 12px;
+}
+.table-compact td,
+.table-compact th {
+  padding: 0.5rem 0.5rem;
+}
+
+/* --- Compact dropdown menu (Aksi dropdown di panel.js) --- */
+.dropdown-menu.compact-menu {
+  font-size: 0.82rem;
+}
+.dropdown-menu.compact-menu .dropdown-item {
+  padding: 0.2rem 0.8rem;
+  line-height: 1.2;
+}
+.dropdown-menu.compact-menu .dropdown-header {
+  padding: 0.35rem 0.8rem;
+}
+.dropdown-menu.compact-menu .dropdown-divider {
+  margin: 0.2rem 0;
+}
+
+/* --- Hide saat minimized (jika nanti pakai fitur minimize side panel) --- */
+.hide-on-minimized {
+  transition: opacity 0.3s ease;
+}
+body.minimized .hide-on-minimized {
+  display: none !important;
+}
+
+/* --- Text align khusus tabel aktif data --- */
+#tBodyAktifData td {
+  text-align: left;
+}
+/* ============================================================
+   Tom Select — Light & Dark Theme Override
+   ============================================================ */
+
+/* ---------- Light Mode Baseline ---------- */
+.ts-wrapper.form-select,
+.ts-wrapper.form-control,
+.ts-wrapper {
+  padding: 0;
+  border: 0;
+}
+
+.ts-wrapper.single .ts-control,
+.ts-wrapper.single.input-active .ts-control {
+  background-color: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.86rem;
+  min-height: auto;
+  box-shadow: none;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.ts-wrapper.single.focus .ts-control {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 0.2rem var(--brand-ring);
+}
+
+.ts-wrapper .ts-control > input {
+  font-size: 0.86rem;
+}
+
+/* Arrow icon — versi light (hitam) */
+.ts-wrapper.single .ts-control::after {
+  border-color: #475569 transparent transparent transparent;
+}
+
+/* Dropdown panel */
+.ts-dropdown {
+  background-color: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  font-size: 0.86rem;
+  z-index: 10000 !important;
+}
+
+.ts-dropdown .option {
+  padding: 0.4rem 0.7rem;
+  color: var(--ink);
+}
+
+.ts-dropdown .option:hover,
+.ts-dropdown .option.active {
+  background-color: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+.ts-dropdown .option.selected {
+  background-color: rgba(15, 127, 140, 0.12);
+  color: var(--brand-dark);
+  font-weight: 600;
+}
+
+.ts-dropdown .optgroup-header {
+  background-color: var(--surface-2);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 0.35rem 0.7rem;
+}
+
+/* Placeholder option ("-- Lewati Kolom --", "-- Pilih --") */
+.ts-dropdown .option[data-value=""],
+.ts-dropdown .opt-placeholder {
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------
+   Dark Mode
+   ------------------------------------------------------------ */
+html[data-theme="dark"] .ts-wrapper.single .ts-control,
+html[data-theme="dark"] .ts-wrapper.single.input-active .ts-control {
+  background-color: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme="dark"] .ts-wrapper.single.focus .ts-control {
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 0.2rem var(--brand-ring) !important;
+}
+
+html[data-theme="dark"] .ts-wrapper .ts-control > input {
+  color: var(--ink) !important;
+}
+
+html[data-theme="dark"] .ts-wrapper .ts-control > input::placeholder {
+  color: var(--muted) !important;
+}
+
+/* Arrow icon — versi dark (terang) */
+html[data-theme="dark"] .ts-wrapper.single .ts-control::after {
+  border-color: #cbd5e1 transparent transparent transparent !important;
+}
+
+/* Dropdown panel */
+html[data-theme="dark"] .ts-dropdown {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+html[data-theme="dark"] .ts-dropdown .option {
+  color: #f1f5f9 !important;
+}
+
+html[data-theme="dark"] .ts-dropdown .option:hover,
+html[data-theme="dark"] .ts-dropdown .option.active {
+  background-color: rgba(20, 184, 166, 0.18) !important;
+  color: #2dd4bf !important;
+}
+
+html[data-theme="dark"] .ts-dropdown .option.selected {
+  background-color: rgba(20, 184, 166, 0.25) !important;
+  color: #2dd4bf !important;
+}
+
+html[data-theme="dark"] .ts-dropdown .optgroup-header {
+  background-color: #172032 !important;
+  color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .ts-dropdown .option[data-value=""],
+html[data-theme="dark"] .ts-dropdown .opt-placeholder {
+  color: #f87171 !important;
+}
+
+/* No-results & loading */
+html[data-theme="dark"] .ts-dropdown .no-results,
+html[data-theme="dark"] .ts-dropdown .ts-dropdown-content > .loading {
+  color: #94a3b8 !important;
+  background-color: #1e293b !important;
+}
+
+/* Clear button */
+html[data-theme="dark"] .ts-wrapper .clear-button {
+  color: #94a3b8 !important;
+}
+html[data-theme="dark"] .ts-wrapper .clear-button:hover {
+  color: #f87171 !important;
+}
+
+/* Dropdown di dalam mini-field (data-preparation) — biar pas */
+.mini-field .ts-wrapper.single .ts-control {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.8rem;
+}

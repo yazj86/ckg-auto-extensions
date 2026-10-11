@@ -1,0 +1,808 @@
+function waitForElement(xpath, callback, parentEl, maxTries = 10) {
+  let attempt = 0;
+
+  function tryFind() {
+    attempt++;
+    const element = document.evaluate(
+      xpath,
+      parentEl || document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue;
+
+    if (element) {
+      setTimeout(() => {
+        callback(element);
+      }, 500);
+    } else if (attempt < maxTries) {
+      // Gradually increase delay: e.g., 200ms, 400ms, 600ms...
+      const delay = 500 * attempt;
+      setTimeout(tryFind, delay);
+    } else {
+      console.warn("Element not found after", maxTries, "attempts", xpath);
+    }
+  }
+
+  tryFind();
+}
+
+function clickElement(el) {
+  if (el) {
+    el.dispatchEvent(
+      new MouseEvent("click", {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  }
+}
+function inputElementValue(el, val) {
+  if (el) {
+    el.value = val;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+}
+
+const forceInput = (el, val) => {
+  const setter = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    "value",
+  ).set;
+  setter.call(el, String(val));
+
+  ["input", "change", "blur", "keyup"].forEach((e) =>
+    el.dispatchEvent(new Event(e, { bubbles: true })),
+  );
+};
+
+const typeInto = async (el, text, delay = 60) => {
+  text = String(text);
+  el.focus();
+  el.value = "";
+  for (const ch of text) {
+    document.execCommand("insertText", false, ch);
+    await new Promise((r) => setTimeout(r, delay));
+  }
+};
+
+const clickRadioByText = (text) => {
+  [...document.querySelectorAll("label")]
+    .find((l) => l.innerText.trim() === text)
+    ?.click();
+};
+
+function enterKeyElement(el) {
+  if (el) {
+    el.focus();
+
+    const eventProps = {
+      key: "Enter",
+      code: "Enter",
+      keyCode: 13,
+      which: 13,
+      bubbles: true,
+      cancelable: true,
+    };
+
+    el.dispatchEvent(new KeyboardEvent("keydown", eventProps));
+    el.dispatchEvent(new KeyboardEvent("keypress", eventProps));
+    el.dispatchEvent(new KeyboardEvent("keyup", eventProps));
+  }
+}
+
+function makeXPathCaseInsensitive(text) {
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  return `translate(normalize-space(.), '${uppercase}', '${lowercase}')`;
+}
+
+// function enterKeyElement(el) {
+//     if (el) {
+//         el.dispatchEvent(
+//             new KeyboardEvent("keydown", {
+//                 key: "Enter",
+//                 code: "Enter",
+//                 keyCode: 13, // for older browsers
+//                 which: 13, // for older browsers
+//                 bubbles: true,
+//                 cancelable: true,
+//             }),
+//         );
+//         el.dispatchEvent(
+//             new KeyboardEvent("keyup", {
+//                 key: "Enter",
+//                 code: "Enter",
+//                 keyCode: 13,
+//                 which: 13,
+//                 bubbles: true,
+//                 cancelable: true,
+//             }),
+//         );
+//     }
+// }
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+async function sleepUntilLoaded(ms = 500, text = "Memuat data", maxRetry = 20) {
+  for (let i = 0; i < maxRetry; i++) {
+    await new Promise((r) => setTimeout(r, ms));
+    if (!document.body.textContent.toLowerCase().includes(text.toLowerCase())) {
+      await new Promise((r) => setTimeout(r, ms)); // safety wait
+      if (!document.body.textContent.toLowerCase().includes(text.toLowerCase()))
+        return true;
+    }
+  }
+  throw new Error(`Timeout: "${text}" still exists`);
+}
+
+// Helper: wait for element returns Promise
+function waitForElementAsync(xpathOrSelector, parentEl, timeout = 5000) {
+  return new Promise((resolve, reject) => {
+    waitForElement(
+      xpathOrSelector,
+      (el) => {
+        if (el) resolve(el);
+        else reject(`Element not found: ${xpathOrSelector}`);
+      },
+      parentEl,
+    );
+    setTimeout(
+      () => reject(`Timeout waiting for: ${xpathOrSelector}`),
+      timeout,
+    );
+  });
+}
+
+function cleanPhoneNumber(phone, defPhone = "8000000") {
+  if (!phone) return defPhone;
+  phone = String(phone);
+
+  // Remove all non-digit characters
+  phone = phone.replace(/\D/g, "");
+
+  // Remove leading 0 or 62
+  if (phone.startsWith("0")) {
+    phone = phone.slice(1);
+  } else if (phone.startsWith("62")) {
+    phone = phone.slice(2);
+  }
+
+  // Ensure first digit is 8
+  if (!phone.startsWith("8")) {
+    phone = "8" + phone;
+  }
+
+  // Ensure length between 7 and 13
+  if (phone.length < 7 || phone.length > 13) {
+    return defPhone;
+  }
+
+  return phone;
+}
+
+function parseDateString(dateStr) {
+  // Check format using regex
+  const match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(dateStr);
+  if (!match) {
+    console.warn("Invalid date format. Expected DD-MM-YYYY");
+    return null;
+  }
+
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10); // 1-12
+  const year = parseInt(match[3], 10);
+
+  const dayStr = String(day).padStart(2, "0");
+  const monthStr = String(month).padStart(2, "0");
+
+  return { day, month, year, date: `${year}-${monthStr}-${dayStr}` };
+}
+
+function parseDDMMYYYY(dateStr) {
+  const [day, month, year] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day); // JS months = 0-11
+}
+
+function isUnder10Years(dateStr) {
+  const birthDate = parseDDMMYYYY(dateStr);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--; // adjust if birthday hasn’t passed yet this year
+  }
+
+  return age < 10;
+}
+
+function isUnder6Years(dateStr) {
+  const birthDate = parseDDMMYYYY(dateStr);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--; // adjust if birthday hasn’t passed yet this year
+  }
+
+  return age < 6;
+}
+
+function isOver60Years(dateStr) {
+  const birthDate = parseDDMMYYYY(dateStr);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age >= 60;
+}
+
+function setPekerjaanBasedOnAge(pekerjaan, status_usia) {
+  if (status_usia == "BALITA") {
+    return "Belum/Tidak Bekerja";
+  } else if (status_usia == "SEKOLAH") {
+    return "Pelajar";
+  } else {
+    return pekerjaan;
+  }
+}
+
+function getPekerjaanLabel(pekerjaan) {
+  const listPekerjaan = [
+    {
+      label: "Belum/Tidak Bekerja",
+      value: "belum-tidak-bekerja",
+    },
+    {
+      label: "Pelajar",
+      value: "pelajar",
+    },
+    {
+      label: "Mahasiswa",
+      value: "mahasiswa",
+    },
+    {
+      label: "Ibu Rumah Tangga",
+      value: "ibu-rumah-tangga",
+    },
+    {
+      label: "TNI",
+      value: "tni",
+    },
+    {
+      label: "POLRI",
+      value: "polri",
+    },
+    {
+      label: "ASN (Kantor Pemerintah)",
+      value: "asn-kantor-pemerintah",
+    },
+    {
+      label: "Pegawai Swasta",
+      value: "pegawai-swasta",
+    },
+    {
+      label: "Wirausaha/Pekerja Mandiri",
+      value: "wirausaha-pekerja-mandiri",
+    },
+    {
+      label: "Pensiunan",
+      value: "pensiunan",
+    },
+    {
+      label: "Pejabat Negara / Pejabat Daerah",
+      value: "pejabat-negara-pejabat-daerah",
+    },
+    {
+      label: "Pengusaha",
+      value: "pengusaha",
+    },
+    {
+      label: "Dokter",
+      value: "dokter",
+    },
+    {
+      label: "Bidan",
+      value: "bidan",
+    },
+    {
+      label: "Perawat",
+      value: "perawat",
+    },
+    {
+      label: "Apoteker",
+      value: "apoteker",
+    },
+    {
+      label: "Psikolog",
+      value: "psikolog",
+    },
+    {
+      label: "Tenaga Kesehatan Lainnya",
+      value: "tenaga-kesehatan-lainnya",
+    },
+    {
+      label: "Dosen",
+      value: "dosen",
+    },
+    {
+      label: "Guru",
+      value: "guru",
+    },
+    {
+      label: "Peneliti",
+      value: "peneliti",
+    },
+    {
+      label: "Pengacara",
+      value: "pengacara",
+    },
+    {
+      label: "Notaris",
+      value: "notaris",
+    },
+    {
+      label: "Hakim/Jaksa/Tenaga Peradilan Lainnya",
+      value: "hakim-jaksa-tenaga-peradilan-lainnya",
+    },
+    {
+      label: "Akuntan",
+      value: "akuntan",
+    },
+    {
+      label: "Insinyur",
+      value: "insinyur",
+    },
+    {
+      label: "Arsitek",
+      value: "arsitek",
+    },
+    {
+      label: "Konsultan",
+      value: "konsultan",
+    },
+    {
+      label: "Wartawan",
+      value: "wartawan",
+    },
+    {
+      label: "Pedagang",
+      value: "pedagang",
+    },
+    {
+      label: "Petani / Pekebun",
+      value: "petani-pekebun",
+    },
+    {
+      label: "Nelayan / Perikanan",
+      value: "nelayan-perikanan",
+    },
+    {
+      label: "Peternak",
+      value: "peternak",
+    },
+    {
+      label: "Tokoh Agama",
+      value: "tokoh-agama",
+    },
+    {
+      label: "Juru Masak",
+      value: "juru-masak",
+    },
+    {
+      label: "Pelaut",
+      value: "pelaut",
+    },
+    {
+      label: "Sopir",
+      value: "sopir",
+    },
+    {
+      label: "Pilot",
+      value: "pilot",
+    },
+    {
+      label: "Masinis",
+      value: "masinis",
+    },
+    {
+      label: "Atlet",
+      value: "atlet",
+    },
+    {
+      label: "Pekerja Seni",
+      value: "pekerja-seni",
+    },
+    {
+      label: "Penjahit / Perancang Busana",
+      value: "penjahit-perancang-busana",
+    },
+    {
+      label: "Karyawan kantor / Pegawai Administratif",
+      value: "karyawan-kantor-pegawai-administratif",
+    },
+    {
+      label: "Teknisi / Mekanik",
+      value: "teknisi-mekanik",
+    },
+    {
+      label: "Pekerja Pabrik / Buruh",
+      value: "pekerja-pabrik-buruh",
+    },
+    {
+      label: "Pekerja Konstruksi",
+      value: "pekerja-konstruksi",
+    },
+    {
+      label: "Pekerja Pertukangan",
+      value: "pekerja-pertukangan",
+    },
+    {
+      label: "Pekerja Migran",
+      value: "pekerja-migran",
+    },
+    {
+      label: "Lainnya",
+      value: "lainnya",
+    },
+  ];
+  const occupationMap = {
+    "belum bekerja": "belum-tidak-bekerja",
+    "belum/tidak bekerja": "belum-tidak-bekerja",
+    pelajar: "pelajar",
+    mahasiswa: "mahasiswa",
+    "ibu rumah tangga": "ibu-rumah-tangga",
+    "mengurus rumah tangga": "ibu-rumah-tangga",
+    "karyawan / pegawai": "karyawan-kantor-pegawai-administratif",
+    karyawan: "karyawan-kantor-pegawai-administratif",
+    "karyawan swasta": "pegawai-swasta",
+    "pedagang / wirausaha": "wirausaha-pekerja-mandiri",
+    pedagang: "pedagang",
+    wirausaha: "wirausaha-pekerja-mandiri",
+    pns: "asn-kantor-pemerintah",
+    "tni/polri": "tni",
+    tni: "tni",
+    polri: "polri",
+    "dokter/bidan": "dokter",
+    dokter: "dokter",
+    bidan: "bidan",
+    "dosen/guru": "dosen",
+    dosen: "dosen",
+    guru: "guru",
+    pensiunan: "pensiunan",
+    buruh: "pekerja-pabrik-buruh",
+    lainnya: "lainnya",
+    "-": "lainnya",
+  };
+
+  const key = pekerjaan.toLowerCase().trim();
+  const value = occupationMap[key];
+  const findPekerjaan = listPekerjaan.find((it) => it.value === value);
+  if (findPekerjaan) {
+    return findPekerjaan.label;
+  }
+  return "Lainnya";
+}
+
+function toSnakeCase(str) {
+  return str
+    .toLowerCase()
+    .replace(/\s+/g, "_") // spaces -> underscore
+    .replace(/__+/g, "_") // collapse multiple underscores
+    .replace(/^_+|_+$/g, ""); // trim underscores
+}
+
+function getAdminList(parentEl) {
+  // Select all the button divs
+  const buttons = parentEl.querySelectorAll("button div");
+  // Extract text and clean it
+  return Array.from(buttons)
+    .map((div) => div.textContent.trim())
+    .filter((text) => text.length > 0); // remove empty ones
+}
+
+function getAdminText(parentEl, text) {
+  const listAdmin = getAdminList(parentEl);
+  const find = listAdmin.find((it) => toSnakeCase(it) === toSnakeCase(text));
+  return find;
+}
+
+async function selectWithRetry(
+  parentXPath,
+  childText,
+  maxRetries = 5,
+  delay = 500,
+) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await sleep(delay * attempt);
+      // wait for parent
+      const parentEl = await waitForElementAsync(parentXPath);
+
+      if (!parentEl) {
+        console.warn(`Parent not found (attempt ${attempt}/${maxRetries})`);
+        continue;
+      }
+
+      // build child xpath relative to parent
+      const childXPath = `.//button[.//div[contains(normalize-space(.), '${childText}')]]`;
+      const childEl = await waitForElementAsync(childXPath, parentEl);
+
+      if (childEl) {
+        clickElement(childEl);
+        return true; // ✅ success
+      } else {
+        console.warn(`Child not found (attempt ${attempt}/${maxRetries})`);
+      }
+    } catch (err) {
+      console.error(`Error on attempt ${attempt}:`, err);
+    }
+  }
+
+  console.error(`Failed to find ${childText} after ${maxRetries} retries`);
+  return false;
+}
+
+function waitForPageLoad(timeout = 20000) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const check = () => {
+      if (document.readyState === "complete") {
+        resolve();
+      } else if (Date.now() - start > timeout) {
+        reject(new Error("Timeout waiting for page load"));
+      } else {
+        requestAnimationFrame(check);
+      }
+    };
+    check();
+  });
+}
+
+async function waitForCondition(
+  conditionFn,
+  interval = 5000,
+  timeout = 300000,
+) {
+  const start = Date.now();
+
+  return new Promise((resolve, reject) => {
+    const check = async () => {
+      try {
+        if (conditionFn()) {
+          resolve(true);
+        } else if (Date.now() - start > timeout) {
+          reject(new Error("waitForCondition: timeout"));
+        } else {
+          setTimeout(check, interval);
+        }
+      } catch (err) {
+        reject(err);
+      }
+    };
+    check();
+  });
+}
+
+const X_PATH = {
+  BTN_DAFTAR_BARU:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[2]/div[2]/div[2]/div/button",
+  INPUT_NIK:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[2]/div[1]/label/input",
+  CHECKBOX_NO_NIK:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[2]/div[2]/div/div/div[1]/div",
+  // INPUT_NAMA_LENGKAP:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[3]/div[1]/label/input",
+  INPUT_NAMA_LENGKAP: "//input[@name='Nama']",
+  // INPUT_JENIS_KELAMIN:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[5]/div/div[2]/div[2]",
+  INPUT_JENIS_KELAMIN:
+    "//span[contains(text(),'Pilih jenis kelamin')]/parent::div",
+  // INPUT_JENIS_KELAMIN:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[5]/div/div[2]/div[2]",
+  SELECT_JK_LK:
+    "//div[text()='Laki-laki']/ancestor::div[contains(@class,'cursor-pointer')]",
+  // SELECT_JK_LK:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[5]/div/div[2]/div[3]/div/div[1]",
+  SELECT_JK_PR:
+    "//div[text()='Perempuan']/ancestor::div[contains(@class,'cursor-pointer')]",
+  // SELECT_JK_PR:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[5]/div/div[2]/div[3]/div/div[2]",
+  INPUT_WA:
+    "//label[contains(., 'No. Whatsapp Aktif')]//input[@name='Nomor Whatsapp']",
+  // INPUT_WA:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[6]/div[1]/label/div[2]/input",
+  INPUT_ALAMAT: "//textarea[@id='detail-domisili']",
+  // INPUT_ALAMAT:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[9]/div/label/textarea",
+  INPUT_TGL_LAHIR:
+    "//div[@id='Tanggal Lahir']//div[contains(@class,'mx-input-wrapper')]",
+  // INPUT_TGL_LAHIR:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[4]/div/div[2]/div/div",
+  INPUT_TGL_LAHIR_YEAR: "//button[contains(@class,'mx-btn-current-year')]",
+  // INPUT_TGL_LAHIR_YEAR: "/html/body/div[3]/div/div/div[1]/span/button[2]",
+  INPUT_TGL_LAHIR_YEAR_TABLE: "//table[contains(@class,'mx-table-year')]",
+  // INPUT_TGL_LAHIR_YEAR_TABLE: "/html/body/div[3]/div/div/div[2]/table",
+  INPUT_TGL_LAHIR_YEAR_BEFORE:
+    "//button[contains(@class,'mx-btn-icon-double-left')]",
+  // INPUT_TGL_LAHIR_YEAR_BEFORE: "/html/body/div[3]/div/div/div[1]/button[1]",
+  INPUT_TGL_LAHIR_MONTH_TABLE: "//table[contains(@class,'mx-table-month')]",
+  // INPUT_TGL_LAHIR_MONTH_TABLE: "/html/body/div[3]/div/div/div[2]/table",
+  INPUT_TGL_LAHIR_DAY_TABLE: "//table[contains(@class,'mx-table-date')]",
+  // INPUT_TGL_LAHIR_DAY_TABLE: "/html/body/div[3]/div/div/div[2]/table",
+  INPUT_PEKERJAAN:
+    "//div[contains(@class,'cursor-pointer') and contains(text(),'Pilih pekerjaan')]",
+  // INPUT_PEKERJAAN:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[7]/div/div/div[2]/div/div[1]",
+  INPUT_PEKERJAAN_PARENT:
+    "//div[contains(@class,'modal-content')][.//div[text()='Pilih Pekerjaan']]",
+  // INPUT_PEKERJAAN_PARENT: "/html/body/div[3]/div[2]/div[2]/div",
+  INPUT_ALAMAT_DOMISILI:
+    "//div[contains(@class,'cursor-pointer') and contains(text(),'Pilih alamat domisili')]",
+  // INPUT_ALAMAT_DOMISILI:
+  //     "//div[contains(text(), 'Alamat Domisili')]/following-sibling::div/div[contains(@class, 'cursor-pointer')]",
+  // INPUT_ALAMAT_DOMISILI:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[1]/div[8]/div/div[2]/div",
+  INPUT_ALAMAT_DOMISILI_PROVINSI_PARENT:
+    "//div[text()='Daftar Provinsi']/parent::div",
+  // INPUT_ALAMAT_DOMISILI_PROVINSI_PARENT:
+  //     "/html/body/div[3]/div[2]/div[4]/div",
+  INPUT_ALAMAT_DOMISILI_KAB_KOTA_PARENT:
+    "//div[text()='Daftar Kabupaten/Kota']/parent::div",
+  // INPUT_ALAMAT_DOMISILI_KAB_KOTA_PARENT:
+  //     "/html/body/div[3]/div[2]/div[4]/div",
+  INPUT_ALAMAT_DOMISILI_KECAMATAN_PARENT:
+    "//div[text()='Daftar Kecamatan']/parent::div",
+  // INPUT_ALAMAT_DOMISILI_KECAMATAN_PARENT:
+  //     "/html/body/div[3]/div[2]/div[4]/div",
+  INPUT_ALAMAT_DOMISILI_KEL_DESA_PARENT:
+    "//div[text()='Daftar Kelurahan']/parent::div",
+  // INPUT_ALAMAT_DOMISILI_KEL_DESA_PARENT:
+  //     "/html/body/div[3]/div[2]/div[4]/div",
+  INPUT_TGL_PEMERIKSAAN_PARENT:
+    "//div[text()='Tanggal Pemeriksaan']/following::div[contains(@class,'shadow-gmail')][1]",
+  // INPUT_TGL_PEMERIKSAAN_PARENT:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[1]/div[2]/div[2]/div/div[2]/div[2]",
+  BTN_SELANJUTNYA: "//button[.//div[normalize-space()='Selanjutnya']]",
+  // BTN_SELANJUTNYA:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[2]/div/button",
+  BTN_LANJUT_KUOTA_HABIS: "//button[.//div[normalize-space()='Lanjut']]",
+  // BTN_LANJUT_KUOTA_HABIS:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div[2]/div[2]/div/div[3]/div[2]/button",
+  BTN_PILIH_PESERTA: "//button[.//div[text()='Pilih']]",
+  // BTN_PILIH_PESERTA:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[3]/div[3]/div/table/tbody/tr/td[5]/div/button",
+  BTN_DAFTAR_TANPA_NIK:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[3]/div[5]/div[2]/div[2]/button",
+  // BTN_DAFTAR_DENGAN_NIK:
+  //     "//button[.//div[text()='Daftarkan dengan NIK']]",
+  BTN_DAFTAR_DENGAN_NIK:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[3]/div[5]/div[2]/div[1]/button",
+  MSG_POPUP_TERJADI_KESALAHAN:
+    "//span[contains(., 'Terjadi kesalahan')]/ancestor::div[contains(@class,'p-2')]//div[contains(@class,'my-4')]//span",
+  MSG_POPUP:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[6]/div[2]/div/div[1]/div",
+  MSG_POPUP_SUCCESS:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div[1]/div[1]",
+  MSG_DATA_BELUM_SESUAI_KTP:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[6]/div[2]/div/div[1]/div",
+  MSG_KUOTA_HABIS:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[6]/div[2]/div/div[1]/div",
+  BTN_TUTUP_SUCCESS_DAFTAR:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div[3]/div[2]/button",
+  SELECT_SEARCH:
+    "//div[contains(@class, 'cursor-pointer')]//span[text()='Nomor Tiket']",
+  // SELECT_SEARCH_NAMA:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[1]/div[2]/div[1]/div/div[3]/div/div[3]",
+  SELECT_SEARCH_NIK: "//div[contains(@style, 'transform')]//div[text()='NIK']",
+  INPUT_SEARCH: "//input[@id='nik' and @placeholder='Masukkan NIK']",
+  BTN_KONFIMASI_HADIR:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[3]/div/div/table/tbody/tr/td[6]/div/div[1]/div/button",
+  CHECKBOX_BERSEDIA_CKG:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[4]/div[2]/div/div[4]/div[3]/div[1]/div/div[1]/div",
+  BTN_HADIR_CKG:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[4]/div[2]/div/div[5]/div[2]/button",
+  // MSG_POPUP_BERHASIL_HADIR:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[4]/div[2]/div/div[1]/div[1]",
+  MSG_POPUP_BERHASIL_HADIR: "//div[contains(., 'Berhasil Hadir')]",
+  // MSG_POPUP_BERHASIL_HADIR: "//div[contains(@class, 'shadow-gmail')]//div[contains(@class, 'flex-col')]//div[1]",
+
+  CHECKBOX_TANPA_WALI: "//div[@class='check' and @id='noWali']",
+  // CHECKBOX_TANPA_WALI:
+  //     "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[4]/div/div[1]/div/div[1]/div",
+  BTN_DAFTAR_TANPA_WALI:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[3]/div[5]/div[2]/div/div/div[4]/div/form/div[5]/div[2]/button",
+
+  // ====== POPUP BERHASIL DAFTAR ======
+  POPUP_BERHASIL_DAFTAR:
+    "//div[contains(@class,'z-1000')][.//div[contains(text(),'Berhasil Daftar')]]",
+  NO_TIKET_POPUP: "//div[contains(text(),'No. Tiket')]",
+  BTN_BANTU_SKRINING_MANDIRI:
+    "//button[@type='button' and contains(., 'Bantu Isi Skrining Mandiri')]",
+  BTN_TUTUP_POPUP_GENERIC: "//button[@type='button' and contains(., 'Tutup')]",
+
+  // PEMERIKSAAN
+
+  SELECT_SEARCH_PELAYANAN:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[4]/div[2]/div[2]/div[1]/div/div[2]",
+  SELECT_SEARCH_NAMA_PELAYANAN:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[4]/div[2]/div[2]/div[1]/div/div[3]/div/div[3]",
+  SELECT_SEARCH_NIK_PELAYANAN:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[4]/div[2]/div[2]/div[1]/div/div[3]/div/div[3]",
+  INPUT_SEARCH_PELAYANAN:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[4]/div[2]/div[2]/div[2]/label/div/input",
+  INPUT_SEARCH_NIK_PELAYANAN:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[4]/div[2]/div/div[2]/label/div/input",
+  BTN_MULAI_PELAYANAN:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[4]/div[3]/div/table/tbody/tr/td[9]/div/div/button",
+  BTN_MULAI_PEMERIKSAAN: ".//button[normalize-space(.)='Mulai Pemeriksaan']",
+  BTN_MULAI_PEMERIKSAAN_SIMPAN: "//button//div[contains(text(), 'Simpan')]",
+  BTN_SELESAIKAN_LAYANAN: "//button[contains(., 'Selesaikan Layanan')]",
+
+  BTN_INPUT_GIZI:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[5]/div[2]/div[3]/div/div/div/div[1]/div[4]/div/button",
+  INPUT_GIZI_BB: "//input[@id='sq_100i']",
+  INPUT_GIZI_TB: "//input[@id='sq_101i']",
+  INPUT_GIZI_LP: "//input[@id='sq_102i']",
+  BTN_INPUT_DATA_KIRIM: "//input[@type='button' and @value='Kirim']",
+
+  BTN_INPUT_TEKANAN_DARAH: `/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[5]/div[2]/div[3]/div/div/div/div[3]/div[4]/div/button`,
+  INPUT_DARAH_SISTOLIK: "//input[@id='sq_102i']",
+  INPUT_DARAH_DIASTOLIK: "//input[@id='sq_103i']",
+
+  BTN_INPUT_GULA_DARAH:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[5]/div[2]/div[3]/div/div/div/div[2]/div[4]/div/button",
+  INPUT_GDS: "//input[@id='sq_102i']",
+  INPUT_GDP: "//input[@id='sq_104i']",
+  BTN_KIRIM_RAPOR: `/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div/div[5]/div[1]/div[2]/div[1]/div`,
+  BTN_KIRIM_RAPOR_OK:
+    "/html/body/div[1]/main/div/div[1]/section[2]/div/div/div/div[2]/div[2]/div[2]/div/div[4]/div[2]/button",
+
+  // Version 2
+  INPUT_NIK_PENDAFTARAN: "//input[@id='nik']",
+  BTN_CEK_NIK_PENDAFTARAN: "//button[.//div[text()='Cek NIK']]",
+  BTN_GUNAKAN_NIK: "//button[.//div[normalize-space()='Gunakan Data']]",
+  POPUP_NIK_TIDAK_DITEMUKAN: "//div[contains(text(),'Data Tidak Ditemukan')]",
+  POPUP_INDIVIDU_SUDAH_MENERIMA_LAYANAN:
+    "//div[normalize-space()='Individu sudah menerima layanan']",
+  POPUP_DATA_PESERTA_VALID: "//div[normalize-space()='Data peserta valid']",
+  BTN_LANJUTKAN_DATA_VALID:
+    "//div[contains(normalize-space(),'Data peserta valid')]/ancestor::div[contains(@class,'shadow-gmail')]//button[.//*[normalize-space()='Lanjutkan']]",
+  BTN_SELANJUTNYA_FORMULIR_PENDAFTARAN:
+    "//button[.//*[normalize-space()='Selanjutnya']]",
+  BTN_DAFTARKAN_FORMULIR_PENDAFTARAN:
+    "//button[.//*[normalize-space()='Daftarkan']]",
+  BTN_PILIH_TABLE_DATA_PESERTA:
+    "//table/tbody/tr[1]//button[contains(., 'Pilih')]",
+  BTN_DAFTARKAN_DENGAN_NIK: "//button[contains(., 'Daftarkan dengan NIK')]",
+  BTN_MULAI_PEMERIKSAAN_TABLE:
+    "//table//tbody/tr[1]//button[.//div[normalize-space()='Mulai']]",
+  // WALI
+
+  INPUT_NIK_WALI: "//input[@id='nik wali']",
+  INPUT_NAMA_LENGKAP_WALI: "//input[@name='Nama Lengkap Wali']",
+  INPUT_JENIS_KELAMIN_WALI:
+    "//span[contains(text(),'Pilih Jenis Kelamin')]/parent::div",
+  INPUT_WA_WALI:
+    "//label[contains(., 'No. Whatsapp Wali')]//input[@name='Nomor whatsapp']",
+  INPUT_TGL_LAHIR_WALI:
+    "(//div[@id='Tanggal Lahir']//div[contains(@class,'mx-input-wrapper')])[2]",
+  POPUP_DATA_PESERTA_WALI_TIDAK_VALID:
+    "//div[normalize-space()='Data peserta atau wali tidak valid']",
+  POPUP_DATA_PESERTA_TIDAK_VALID:
+    "//div[normalize-space()='Data peserta tidak valid']",
+
+  // Formulir Pendaftaran
+  INPUT_STATUS_PERNIKAHAN:
+    "//span[contains(text(),'Pilih status pernikahan')]/parent::div",
+  INPUT_STATUS_DISABILITAS:
+    "//div[contains(text(), 'Penyandang disabilitas')]/following-sibling::div//span[contains(@class, 'line-clamp-2')]",
+};

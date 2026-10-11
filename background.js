@@ -1,0 +1,8 @@
+importScripts("scripts/pemeriksaan-mandiri.background.js");
+
+chrome.runtime.onStartup.addListener(async () => {
+    await chrome.sidePanel.setPanelBehavior({
+        openPanelOnActionClick: true,
+    });
+});
+
